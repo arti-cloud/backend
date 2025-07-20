@@ -43,18 +43,29 @@ class UserController {
         }
     }
 
-    public function updateUser($id, $data){
-        $name = $data['name'];
-        $email = $data['email'];
-        $dob = $data['dob'];
-        $update = $this->connection->prepare("update users set name=  ?, email = ?, dob = ? where id= ?");
-        $update->bind_param('sssi' , $name, $email, $dob, $id);
-        if($update->execute){
-            echo json_encode(['success'=>true]);
-        }else{
-            echo json_encode(['success'=>false, 'error'=>$update->error]);
+    public function updateUser($id, $data)
+    {
+        $stmt = $this->connection->prepare("UPDATE users SET name=?, email=?, password=?, dob=? WHERE id=?");
+        $stmt->bind_param("ssssi", $data['name'], $data['email'], $data['password'], $data['dob'], $id);
+
+        try {
+            $stmt->execute();
+            if ($stmt->affected_rows > 0) {
+                echo json_encode(['success' => true, 'message' => 'User updated successfully']);
+            } else {
+                echo json_encode(['error' => 'User not found or no changes made']);
+            }
+        } catch (mysqli_sql_exception $e) {
+            if ($e->getCode() === 1062) { // duplicate email
+                http_response_code(409);
+                echo json_encode(['error' => 'Email already exists']);
+            } else {
+                http_response_code(500);
+                echo json_encode(['error' => 'Database error: ' . $e->getMessage()]);
+            }
         }
     }
+
 
     public function deleteUser($id){
         $deleteUser = $this->connection->prepare("delete from users where id = ?");

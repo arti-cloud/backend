@@ -55,6 +55,7 @@ switch ($method) {
             echo json_encode(['error' => 'Missing ID for update']);
         }
         break;
+        
 
     case 'DELETE':
         if ($id) {
