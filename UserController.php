@@ -8,7 +8,6 @@ class UserController {
         $this->connection = $connection;
     }
 
-    // get all users
     public function getUsers(){
         $result = $this->connection->query("select id, name , email , dob from users");
         $users =[];
@@ -18,7 +17,6 @@ class UserController {
         echo json_encode($users);
     }
 
-    //get particular user by id
     public function getUser($id){
         $searchUser = $this->connection->prepare("select id, name,email,dob from users where id = ?");
         $searchUser->bind_param("i" , $id);
@@ -56,7 +54,7 @@ class UserController {
                 echo json_encode(['error' => 'User not found or no changes made']);
             }
         } catch (mysqli_sql_exception $e) {
-            if ($e->getCode() === 1062) { // duplicate email
+            if ($e->getCode() === 1062) { 
                 http_response_code(409);
                 echo json_encode(['error' => 'Email already exists']);
             } else {
